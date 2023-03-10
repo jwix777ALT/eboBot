@@ -25,7 +25,8 @@ module.exports.addAffair = async (userId, data) => {
     }
     userAffairs.affairs.push({
         affair: data,
-        date: dateDecorator(Date.now())
+        date: dateDecorator(Date.now()),
+        isDone: false
     });
     try {
         await userAffairs.save();
@@ -63,6 +64,26 @@ module.exports.get = (userId) => {
        resolve(response);
     });
 }
+
+module.exports.getTaskByName = async (userId, taskName) => {
+    const mySelf = await Affair.findOne({userId});
+    const tasks = mySelf.affairs;
+    const task = tasks.find(task => task.affair === taskName);
+    return task;
+}
+
+module.exports.changeState = async (userId, taskId) => {
+    let userAffairs = await Affair.findOne({userId: userId}).exec();
+    if(!userAffairs){
+        throw new Error("Ошибка: Нет такой задачи: " + taskId);
+    } else {
+        let affair = userAffairs.affairs.find(el => el.affair === taskId);
+        affair.isDone = ! affair.isDone;
+        await Affair.updateOne({_id: userAffairs._id},
+                               {$set: {affairs: userAffairs.affairs}},
+                               {});
+    }
+};
 
 /**
  * Требуется чтобы один раз заполнить базу данными из файлов

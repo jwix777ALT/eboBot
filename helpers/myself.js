@@ -14,10 +14,14 @@ module.exports.list = async (userId, userName) => {
         let toDoList = [];
         try {
             const queryMyself = await modelMyself.get(userId);
-            toDoList = await botDecorator(userId, queryMyself.affairs);
-            toDoList.unshift(userName + ", ты успел натворить:");
-            resolve(toDoList.join('\n'));
-        }catch (err) {
+            if (!queryMyself) {
+                resolve(toDoList);
+            } else {
+                toDoList = await botDecorator(userId, queryMyself.affairs);
+                resolve(toDoList);
+            }
+        } catch (err) {
+            console.log("affairs list error", err);
             reject(new Error('Не могу показать твой лист, дружочек =('));
         }
     });
@@ -57,36 +61,16 @@ module.exports.clear =  async (userId) => { //просто удаляет фай
     });
 }
 
-//Требовался только один раз, по этому заглушка
-//потребовался второй раз, но все равно заглушка
-/*module.exports.refactor = async (users) => {
-    const message = [];
-    users.forEach((user) => {
-        const filename = './myself_lists/' + user + '.txt';
-
+module.exports.changeState = async (userId, taskId) => {
+    return new Promise( async (resolve, reject) => {
         try {
-            const file =  fs.readFileSync(filename);
-            let toDoList = JSON.parse(file);
-            toDoList = toDoList.map((unit) => {
-                return {
-                    affair: unit,
-                    date: "0 Января"
-                }
-            });
-            modelMyself.refactor(user, toDoList);
-            message.push(`${user} ИЗМЕНЕН`);
-
+            await modelMyself.changeState(userId, taskId);
+            resolve("Сделано");
+        } catch (err) {
+            reject(new Error(err.message));
         }
-        catch (err){
-            message.push(`${user} не имеет файла`);
-        }
-
     });
-    return new Promise( resolve=>{
-        resolve(message.join('\n'))});
-    //return "Заглушка";
-
-}*/
+};
 
 /**
  * Генерирует файл с листом самооценки
@@ -148,14 +132,24 @@ module.exports.garbageCollector = async (userId) => {
  */
 async function botDecorator(userId, affairs){
     try{
-        const showDate = await modelUser.get(userId);
-        let i = 1;
-        return affairs.map((affair) => {
-            return `${i++}- ${showDate.showDate ?'"' + affair.date + '" ' : ''}${affair.affair}`;
+        const user = await modelUser.get(userId);
+        let i = 0;
+        return affairs.map(affair => {
+            const affairDateString = user.showDate ? '"' + affair.date + '" —' : '';
+            const isDoneMark = affair.isDone ? "✅" : "🔲";
+            affair.viewText = `${isDoneMark} ${i++} — ${affairDateString} ${affair.affair}`;
+            return affair;
         });
-    }catch (err) {
+    } catch (err) {
         throw err;
     }
+}
+
+
+module.exports.getViewText = (task) => {
+    // const taskDateString = user.showDate ? '"' + affair.date + '" —' : '';
+    const isDoneMark = task.isDone ? "✅" : "🔲";
+    return `${isDoneMark} ${task.affair}`;
 }
 
 /**

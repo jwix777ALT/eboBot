@@ -8,10 +8,46 @@ const usersSchema = mongoose.Schema({
     firstname: {type: String, default: "null"},
     lastname: {type: String, default: "null"},
     note: {type: String, default: ""},
-    opener: {type: Boolean, default: false}
+    opener: {type: Boolean, default: false},
+    // Current user state.
+    state: {type: String, default: "default"}
 });
 
 const Users = mongoose.model('user', usersSchema);
+
+module.exports.FSM_STATE = {
+    DEFAULT: "default",
+    USER_MANAGEMENT_SELECT_USER: "user-management-select-user",
+    USER_MANAGEMENT_SELECT_OPERATION: "user-management-select-operation",
+    USER_MANAGEMENT_SET_NOTE: "user-management-set-note",
+    TASKS: "tasks",
+    TASK_ADD: "task-add",
+    TASK_CHANGE_STATE: "task-change-state",
+    REPORT_START: "report-start",
+    REPORT_GENERATE: "report-generate",
+};
+
+/**
+ * Get the user state machine state.
+ * @param userId User ID for the state fetch.
+ * @return The current user state machine state.
+ */
+module.exports.getState = async (userId) => {
+    const user = await Users.findOne({userId: userId});
+    return user.state;
+};
+
+/**
+ * Set the user state machine state.
+ * @param userId User ID.
+ * @param newState User state to set.
+ */
+module.exports.setState = async (userId, newState) => {
+    const user = await Users.findOne({userId: userId});
+    await Users.updateOne({_id: user._id},
+                          {$set: {state: newState}},
+                          {});
+};
 
 /**
  * Получает данные из базы
@@ -46,6 +82,13 @@ module.exports.dateDisplay = async (userId, show) => {
  * @returns {Promise<void>}
  */
 module.exports.newUser = async (params) => {
+    var users = await this.getAllUsers()
+    console.log(users)
+    users.forEach(element => {
+        if(element.userId == params.userId){
+            return true
+        }
+    });
     const user = new Users(
         {
             userId: params.userId,
@@ -61,7 +104,7 @@ module.exports.newUser = async (params) => {
     try {
         await user.save();
     } catch (err) {
-        throw new Error('Ошибка при сохранении в базу данных');
+        throw new Error('Ошибка при сохранении в базу данных', err);
     }
 }
 

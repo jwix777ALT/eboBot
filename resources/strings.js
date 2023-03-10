@@ -11,10 +11,11 @@ const keyboardConstants = {
     BELLS: "Расписание звонков",
     JITSY: "Статус онлайн конференций",
     VC: "Открыть ВЦ",
-    MYSELF: "Самооценка",
+    MYSELF: "Задачи",
     RIGHTS: "Управление пользователями",
-    MYSELF_LIST: "Список выполненных дел",
-    MYSELF_NEW: "Добавить новое дело",
+    MYSELF_LIST: "Список выполненных задач",
+    MYSELF_CHANGE_STATUS: "Изменить статус задачи",
+    MYSELF_NEW: "Добавить новую задачу",
     MYSELF_CLEAR: "Очистить список дел",
     MYSELF_GET_FILE: "Выгрузить файлом",
     REPORTS: "Генератор отчетов",
@@ -25,7 +26,14 @@ const keyboardConstants = {
     RIGHTS_USER_SET_OPENER: "Изменить право открытия двери",
     RIGHTS_USER_SET_STATUS: "Изменить статус пользователя",
     RIGHTS_USER_SET_NOTE: "Оставить заметку",
-    RIGHTS_USER_CLEAR: "Отменить выбор",
+    RIGHTS_USER_CLEAR: "Завершить редактирование",
+    TASKS: "Задачи",
+    TASKS_BACK: "Назад",
+    TASKS_NEW: "Добавить новую задачу",
+    TASKS_CHANGE_STATUS: "Изменить статус задачи",
+    TASKS_DELETE: "Удалить задачу",
+    TASKS_GET_FILE: "Выгрузить файлом",
+    CANCEL: "Отмена"
 }
 
 const commands = {
@@ -33,6 +41,7 @@ const commands = {
     MYSELF_NEW: "myselfNew",
     MYSELF_CLEAR: "myselfClear",
     MYSELF_GET_FILE: "myselfFile",
+    MYSELF_CHANGE_STATUS: "myselfChangeStatus",
     MYSELF_QUICK_NEW: "Д:",
     REPORTS_MAN: "reportsMan",
     REPORTS_TEMPLATE: "reportsTemplate",
@@ -41,7 +50,10 @@ const commands = {
     RIGHTS_USER_SET_OPENER: "userSetOpener",
     RIGHTS_USER_SET_STATUS: "userSetStatus",
     RIGHTS_USER_SET_NOTE: "userSetNote",
-    RIGHTS_USER_CLEAR: "userChoiseClear",
+    RIGHTS_USER_CLEAR: "userManagementExit",
+    TASKS_BACK: "tasksBack",
+    TASK_CHANGE_STATUS: "taskChangeStatus",
+    TASK_DELETE: "taskDelete"
 }
 
 module.exports.welcomeMessage = {
@@ -90,7 +102,7 @@ module.exports.mainKeyboard = {
                 ],
                 [
                     keyboardConstants.RIGHTS,
-                    keyboardConstants.MYSELF,
+                    keyboardConstants.TASKS,
                     keyboardConstants.REPORTS
                 ]
             ]
@@ -113,6 +125,38 @@ module.exports.mainKeyboard = {
     }
 }
 
+module.exports.emptyKeyboard = {
+    "reply_markup": {
+        "keyboard": []
+    }
+}
+
+module.exports.cancelKeyboard = {
+    "reply_markup": {
+        "keyboard": [[
+            keyboardConstants.CANCEL
+        ]]
+    }
+}
+
+module.exports.tasksKeyboard = {
+    "reply_markup": {
+        "keyboard": [
+            [
+                keyboardConstants.TASKS_NEW
+            ],
+            [
+                keyboardConstants.TASKS_DELETE
+            ],
+            [
+                keyboardConstants.TASKS_GET_FILE,
+            ],
+            [
+                keyboardConstants.TASKS_BACK
+            ]
+        ]
+    }
+}
 
 module.exports.listsOfRights = {
     students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help', '/admins', '/getId'],
