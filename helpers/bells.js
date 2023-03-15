@@ -11,10 +11,10 @@ module.exports.info = () => {
 	let markup = [
 		'<b>1 пара:</b> 08:10 - 09:40',
 		'<b>2 пара:</b> 09:50 - 11:20',
-		'<b>3 пара:</b> 11:40 - 13:10',
-		'<b>4 пара:</b> 13:20 - 14:50',
-		'<b>5 пара:</b> 15:00 - 16:30',
-		'<b>6 пара:</b> 16:40 - 18:10',
+		'<b>3 пара:</b> 11:50 - 13:20',
+		'<b>4 пара:</b> 13:30 - 15:00',
+		'<b>5 пара:</b> 15:10 - 16:40',
+		'<b>6 пара:</b> 16:50 - 18:30',
 	];
 
 	const markupTime = [		//точность до секунд не важна, используются минуты, прошедшие с начала суток
@@ -32,35 +32,35 @@ module.exports.info = () => {
 		},
 		{
 			description: "2 перемена",
-			stopMinuts: 700,
+			stopMinuts: 710,
 		},
 		{
 			description: "3 пара",
-			stopMinuts: 790,
-		},
-		{
-			description: "3 перемена",
 			stopMinuts: 800,
 		},
 		{
-			description: "4 пара",
-			stopMinuts: 890,
+			description: "3 перемена",
+			stopMinuts: 810,
 		},
 		{
-			description: "4 перемена",
+			description: "4 пара",
 			stopMinuts: 900,
 		},
 		{
-			description: "5 пара",
-			stopMinuts: 990,
+			description: "4 перемена",
+			stopMinuts: 910,
 		},
 		{
-			description: "5 перемена",
+			description: "5 пара",
 			stopMinuts: 1000,
 		},
 		{
+			description: "5 перемена",
+			stopMinuts: 1010,
+		},
+		{
 			description: "6 пара",
-			stopMinuts: 1090,
+			stopMinuts: 1110,
 		},
 	];
 

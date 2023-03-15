@@ -286,7 +286,15 @@ async function rightsMenu(ctx){
     await ctx.reply(message.join('\n'), Markup.inlineKeyboard(
         keyboard).extra());
 }
-
+async function selectUser(ctx){
+    const msg = 'Выбери пользователя, дружочек :)'
+    var keys = []
+    let userList = await userModel.getAllUsers();
+    userList.forEach(function(user){
+        keys.push([Markup.callbackButton(`${user.firstname} ${user.lastname} ${user.userId}`, `${user.userId}`)])
+    })
+    await ctx.reply(msg, Markup.inlineKeyboard(keys).extra())
+}
 bot.start(async (ctx) => {
     await hello(ctx);
 });
@@ -461,7 +469,10 @@ bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
         await mySelfMenuCallback(ctx, callbackQuery);
         await reportMenuCallback(ctx, callbackQuery);
-        await rightsMenuCallback(ctx, callbackQuery);
+        var resp = await rightsMenuCallback(ctx, callbackQuery);
+        if(resp == false){
+            await selectUserCallback(ctx, callbackQuery);
+        }
 });
 
 /**
@@ -470,31 +481,44 @@ bot.on('callback_query', async (ctx) =>{
  * @param callbackQuery
  * @returns {Promise<void>}
  */
+async function selectUserCallback(ctx, callback){
+    try{
+        if(strings.keyboardConstants[callback] == null){
+            intention.rights[ctx.userId].userChoiseId = callback
+            await rightsMenu(ctx)
+        }
+    } catch{}
+}
 async function rightsMenuCallback(ctx, callbackQuery){
     try{
         switch (callbackQuery) {
             case strings.commands.RIGHTS_USER_CHOISE:
-                intention.rights[ctx.userId].userChoise = true;
-                await ctx.reply("Введи id пользователя, дружочек");
+                await selectUser(ctx);
+                return true
                 break;
             case strings.commands.RIGHTS_USER_CLEAR:
                 intention.rights[ctx.userId].userChoiseId = null;
                 intention.rights[ctx.userId].userChoise = null;
                 await ctx.reply("Выбор сброшен");
+                return true
                 break;
             case strings.commands.RIGHTS_USER_SET_STATUS:
                 await rights.changeUserProperty(intention.rights[ctx.userId].userChoiseId, 'status');
                 await ctx.reply("Статус изменен");
+                return true
                 break;
             case strings.commands.RIGHTS_USER_SET_OPENER:
                 await rights.changeUserProperty(intention.rights[ctx.userId].userChoiseId, 'opener');
                 await ctx.reply("Права на замок изменены");
+                return true
                 break;
             case strings.commands.RIGHTS_USER_SET_NOTE:
                 intention.rights[ctx.userId].newNote = true;
                 await ctx.reply("Введи новую заметку о пользователе, дружочек");
+                return true
                 break;
         }
+        return false
     }catch (err) {
         await ctx.reply(err.message);
     }

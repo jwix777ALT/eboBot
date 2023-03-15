@@ -1,0 +1,2 @@
+module.exports.TG_TOKEN = `${process.env.bot_token}`
+module.exports.TG_ADMIN_ID = `${process.env.admin_id}`
