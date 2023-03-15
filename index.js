@@ -16,7 +16,7 @@ const userModel = require('./models/users');
 const logs = require('./models/logs');
 const rights = require('./helpers/cowSuperPowers');
 const logsHelper = require('./helpers/logs');
-
+console.log(cfg.TG_TOKEN)
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
 
@@ -236,7 +236,7 @@ async function mySelfMenu(ctx){
              [[ Markup.callbackButton(strings.keyboardConstants.MYSELF_LIST, strings.commands.MYSELF_LIST)],
              [Markup.callbackButton(strings.keyboardConstants.MYSELF_NEW, strings.commands.MYSELF_NEW)],
              [Markup.callbackButton(strings.keyboardConstants.MYSELF_CLEAR, strings.commands.MYSELF_CLEAR)],
-             [Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
+            //[Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
              ]).extra());
 }
 

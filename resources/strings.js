@@ -17,7 +17,7 @@ const keyboardConstants = {
     MYSELF_NEW: "Добавить новое дело",
     MYSELF_CLEAR: "Очистить список дел",
     MYSELF_GET_FILE: "Выгрузить файлом",
-    REPORTS: "Генератор отчетов",
+    REPORTS: "Генератор отчетов ",
     REPORTS_MAN: "Инструкция",
     REPORTS_TEMPLATE: "Шаблон для заполнения",
     REPORTS_GENERATE: "Сгенерировать отчет",
@@ -86,12 +86,12 @@ module.exports.mainKeyboard = {
                 [
                     keyboardConstants.VC,
                     keyboardConstants.BELLS,
-                    keyboardConstants.JITSY
+                 //   keyboardConstants.JITSY
                 ],
                 [
                     keyboardConstants.RIGHTS,
                     keyboardConstants.MYSELF,
-                    keyboardConstants.REPORTS
+                  //  keyboardConstants.REPORTS
                 ]
             ]
         }
@@ -104,9 +104,9 @@ module.exports.mainKeyboard = {
                     keyboardConstants.BELLS,
                 ],
                 [
-                    keyboardConstants.JITSY,
+                 //   keyboardConstants.JITSY,
                     keyboardConstants.MYSELF,
-                    keyboardConstants.REPORTS
+                  //  keyboardConstants.REPORTS
                 ]
             ]
         }

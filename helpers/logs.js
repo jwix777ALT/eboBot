@@ -8,8 +8,8 @@ const fs = require('fs').promises;
  * @returns {Promise<string[]>}
  */
 module.exports.getLogs = async (userId) => {
-    const pathToUsersLogs = `tmp/usersLog${userId}.csv`;
-    const pathToUsageLogs = `tmp/usageLog${userId}.csv`;
+    const pathToUsersLogs = __dirname + `logs/usersLog${userId}.csv`;
+    const pathToUsageLogs = __dirname + `logs/usageLog${userId}.csv`;
      try {
         await generateUsersLog(pathToUsersLogs);
         await generateUsageLog(pathToUsageLogs);
