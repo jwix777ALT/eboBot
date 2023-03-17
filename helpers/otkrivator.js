@@ -2,7 +2,7 @@ const axios = require('axios');
 
 module.exports.openItPark = () => {
     return new Promise(resolve=>{
-        axios.get('http://192.168.200.147/gpio/2')
+        axios.get('http://192.168.200.158/gpio/2')
             .then((response) => {
                 resolve('Успешно!');
             }).catch(err=>{
