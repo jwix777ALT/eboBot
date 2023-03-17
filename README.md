@@ -24,3 +24,5 @@ export esp_ip=ip адрес esp
 export admin_id=ваш id пользователя в телеграм
 node index
 ```
+
+Прошивка для esp: https://github.com/jwix777ALT/http_relay
