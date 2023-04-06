@@ -26,3 +26,9 @@ node index
 ```
 Страница для проверки: http://ip адрес esp/gpio/2
 Прошивка для esp: https://github.com/jwix777ALT/http_relay
+
+NEW!1!1!1!1!1! DOCKER.
+
+```
+docker run --env=bot_token=токен бота --env=db_ip=ip адрес базы данных--env=esp_ip=ip адрес esp --env=admin_id=ваш id пользователя в телеграм -d jwix777/ebobot:latest
+```
