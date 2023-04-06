@@ -7,3 +7,7 @@ myself_lists/158048277.txt
 /tmp/
 /coverage/
 /resources/config.js
+Dockerfile
+.dockerenv
+docker-compose.yml
+image.tar

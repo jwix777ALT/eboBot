@@ -19,9 +19,7 @@ const Users = mongoose.model('user', usersSchema);
  */
 module.exports.get = (userId) => {
     return new Promise(resolve => {
-        Users.findOne({userId: userId}, (err, data) => {
-            resolve(data);
-        });
+        resolve(Users.findOne({userId: userId}));
     });
 }
 

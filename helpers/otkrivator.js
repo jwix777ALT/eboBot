@@ -2,12 +2,14 @@ const axios = require('axios');
 
 module.exports.openItPark = () => {
     return new Promise(resolve=>{
-        axios.get('http://192.168.200.101/gpio/2')
+        setTimeout(() => {
+        axios.get(`http://${process.env.esp_ip}/gpio/2`)
             .then((response) => {
                 resolve('Успешно!');
             }).catch(err=>{
                 resolve('Ошибка');
             });
+        }, 1000);
 
         /*  rp('http://192.168.200.101/gpio/2').then(html=>{
             resolve('Успешно!');

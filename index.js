@@ -68,15 +68,22 @@ bot.use(async (ctx, next) => {
 bot.use(async (ctx,next) => {
     const user = await userModel.get(ctx.userId);
     if(!user){
+        ctx.status = "student";
+        ctx.opener = "false";
+        console.log(ctx.userId)
+        if(ctx.userId == cfg.TG_ADMIN_ID){
+            ctx.status = 'admin';
+            ctx.opener = "true";
+        }
         await userModel.newUser(
             {
                 userId: ctx.userId,
                 username: ctx.from.username,
                 firstname: ctx.from.first_name,
-                lastname: ctx.from.last_name
+                lastname: ctx.from.last_name,
+                status: ctx.status,
+                opener: ctx.opener
             });
-        ctx.status = "student";
-        ctx.opener = "false";
     }else{
         ctx.status = user.status;
         ctx.note = user.note;
