@@ -115,7 +115,7 @@ bot.use(async (ctx, next) => {
     };
     switch (ctx.updateType){
         case "message":
-            if(ctx.updateSubTypes[0] === 'document'){
+            if(ctx.updateType === 'document'){
                 recordForLog.messageType = 'document';
                 recordForLog.message = 'document';
             }else{
@@ -240,11 +240,11 @@ async function hello(ctx){
 async function mySelfMenu(ctx){
     await ctx.reply('Меню самооценки:',
          Markup.inlineKeyboard(
-             [[ Markup.callbackButton(strings.keyboardConstants.MYSELF_LIST, strings.commands.MYSELF_LIST)],
-             [Markup.callbackButton(strings.keyboardConstants.MYSELF_NEW, strings.commands.MYSELF_NEW)],
-             [Markup.callbackButton(strings.keyboardConstants.MYSELF_CLEAR, strings.commands.MYSELF_CLEAR)],
+             [[ Markup.button.callback(strings.keyboardConstants.MYSELF_LIST, strings.commands.MYSELF_LIST)],
+             [Markup.button.callback(strings.keyboardConstants.MYSELF_NEW, strings.commands.MYSELF_NEW)],
+             [Markup.button.callback(strings.keyboardConstants.MYSELF_CLEAR, strings.commands.MYSELF_CLEAR)],
             //[Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
-             ]).extra());
+             ]));
 }
 
 /**
@@ -255,10 +255,10 @@ async function mySelfMenu(ctx){
 async function reportMenu(ctx){
     await ctx.reply('Меню генерации отчетов по практике:',
         Markup.inlineKeyboard(
-            [[ Markup.callbackButton(strings.keyboardConstants.REPORTS_MAN, strings.commands.REPORTS_MAN)],
-                [Markup.callbackButton(strings.keyboardConstants.REPORTS_TEMPLATE, strings.commands.REPORTS_TEMPLATE)],
-                [Markup.callbackButton(strings.keyboardConstants.REPORTS_GENERATE, strings.commands.REPORTS_GENERATE)],
-            ]).extra());
+            [[ Markup.button.callback(strings.keyboardConstants.REPORTS_MAN, strings.commands.REPORTS_MAN)],
+                [Markup.button.callback(strings.keyboardConstants.REPORTS_TEMPLATE, strings.commands.REPORTS_TEMPLATE)],
+                [Markup.button.callback(strings.keyboardConstants.REPORTS_GENERATE, strings.commands.REPORTS_GENERATE)],
+            ]).reply_markup);
 }
 
 /*const intention = {
@@ -276,14 +276,14 @@ async function reportMenu(ctx){
  */
 async function rightsMenu(ctx){
     const message = ['Меню управления пользователями: '];
-    const keyboard = [[ Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CHOISE, strings.commands.RIGHTS_USER_CHOISE)]];
+    const keyboard = [[ Markup.button.callback(strings.keyboardConstants.RIGHTS_USER_CHOISE, strings.commands.RIGHTS_USER_CHOISE)]];
     if((ctx.userId in intention.rights) && intention.rights[ctx.userId].userChoiseId !== null && intention.rights[ctx.userId].userChoiseId !== undefined){
         message.push(await rights.getUserInfo(intention.rights[ctx.userId].userChoiseId));
         if(message[1].startsWith('Выбран пользователь')){
-            keyboard.push([Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_STATUS, strings.commands.RIGHTS_USER_SET_STATUS)],
-                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_OPENER, strings.commands.RIGHTS_USER_SET_OPENER)],
-                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_NOTE, strings.commands.RIGHTS_USER_SET_NOTE)],
-                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CLEAR, strings.commands.RIGHTS_USER_CLEAR)]);
+            keyboard.push([Markup.button.callback(strings.keyboardConstants.RIGHTS_USER_SET_STATUS, strings.commands.RIGHTS_USER_SET_STATUS)],
+                [Markup.button.callback(strings.keyboardConstants.RIGHTS_USER_SET_OPENER, strings.commands.RIGHTS_USER_SET_OPENER)],
+                [Markup.button.callback(strings.keyboardConstants.RIGHTS_USER_SET_NOTE, strings.commands.RIGHTS_USER_SET_NOTE)],
+                [Markup.button.callback(strings.keyboardConstants.RIGHTS_USER_CLEAR, strings.commands.RIGHTS_USER_CLEAR)]);
         }else{
             intention.rights[ctx.userId].userChoiseId = null;
         }
@@ -291,16 +291,16 @@ async function rightsMenu(ctx){
         message.push('Не выбран пользователь для изменения прав доступа');
     }
     await ctx.reply(message.join('\n'), Markup.inlineKeyboard(
-        keyboard).extra());
+        keyboard));
 }
 async function selectUser(ctx){
     const msg = 'Выбери пользователя, дружочек :)'
     var keys = []
     let userList = await userModel.getAllUsers();
     userList.forEach(function(user){
-        keys.push([Markup.callbackButton(`${user.firstname} ${user.lastname} ${user.userId}`, `${user.userId}`)])
+        keys.push([Markup.button.callback(`${user.firstname} ${user.lastname} ${user.userId}`, `${user.userId}`)])
     })
-    await ctx.reply(msg, Markup.inlineKeyboard(keys).extra())
+    await ctx.reply(msg, Markup.inlineKeyboard(keys))
 }
 bot.start(async (ctx) => {
     await hello(ctx);
@@ -474,11 +474,15 @@ bot.on('text', async (ctx) => {
  */
 bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
-        await mySelfMenuCallback(ctx, callbackQuery);
-        await reportMenuCallback(ctx, callbackQuery);
-        var resp = await rightsMenuCallback(ctx, callbackQuery);
+        var self_menu = await mySelfMenuCallback(ctx, callbackQuery);
         if(resp == false){
-            await selectUserCallback(ctx, callbackQuery);
+            var report_menu = await reportMenuCallback(ctx, callbackQuery);
+            if(report_menu == false){         
+                var resp = await rightsMenuCallback(ctx, callbackQuery);
+                if(resp == false){
+                    await selectUserCallback(ctx, callbackQuery);
+                }
+            }
         }
 });
 
@@ -542,15 +546,19 @@ async function reportMenuCallback(ctx, callbackQuery){
         switch (callbackQuery) {
             case strings.commands.REPORTS_MAN:
                 await ctx.replyWithDocument({source: report.manual()});
+                return true
                 break;
             case strings.commands.REPORTS_TEMPLATE:
                 await ctx.replyWithDocument({source: report.template()});
+                return true
                 break;
             case strings.commands.REPORTS_GENERATE:
                 intention.addTemplateToGenerateReport[ctx.userId] = false;
                 await ctx.reply("Дай мне заполненный шаблон, дружочек");
+                return true
                 break;
         }
+        return false
     }catch (err) {
         await ctx.reply(err.message);
     }
@@ -567,17 +575,22 @@ async function mySelfMenuCallback(ctx, callbackQuery){
         switch (callbackQuery) {
             case strings.commands.MYSELF_LIST:
                 await ctx.reply(await myself.list(ctx.userId, ctx.userName));
+                return true
                 break;
             case strings.commands.MYSELF_NEW:
                 intention.addCase[ctx.userId] = false;
                 await ctx.reply("Что ты сделал, дружочек?");
+                return true
                 break;
             case strings.commands.MYSELF_CLEAR:
                 await ctx.reply(strings.textConstants.DELETE);
+                return true
                 break;
             case strings.commands.MYSELF_GET_FILE:
                 await replyMyselfFile(ctx.userId, ctx);
+                return true
                 break;
+        return false
         }
     }catch (err) {
         await ctx.reply(err.message);
