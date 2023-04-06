@@ -14,3 +14,15 @@ Node.js, Jest 26.6, Mongoose 5.11, Telegraf 3.38\
 Для начала работы с ботом, ессесно, дать команду /help
 
 Разработка еще идет, есть ряд запланированных изменений и новый функционал
+
+Пример запуска:
+
+```
+export bot_token="ваш токен бота"
+export db_ip=ip адрес базы данных
+export esp_ip=ip адрес esp
+export admin_id=ваш id пользователя в телеграм
+node index
+```
+Страница для проверки: http://ip адрес esp/gpio/2
+Прошивка для esp: https://github.com/jwix777ALT/http_relay
