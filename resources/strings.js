@@ -105,7 +105,7 @@ module.exports.mainKeyboard = {
                 ],
                 [
                  //   keyboardConstants.JITSY,
-                    keyboardConstants.MYSELF,
+                 //   keyboardConstants.MYSELF,
                   //  keyboardConstants.REPORTS
                 ]
             ]

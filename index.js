@@ -12,17 +12,22 @@ const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
-const userModel = require('./models/users');
 const logs = require('./models/logs');
 const rights = require('./helpers/cowSuperPowers');
 const logsHelper = require('./helpers/logs');
+const { telegrafThrottler } = require('telegraf-throttler');
+
+var cb_query = {}
 console.log(cfg.TG_TOKEN)
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
 
 
-const bot = new Telegraf(cfg.TG_TOKEN);
+const bot = new Telegraf(cfg.TG_TOKEN, {
+    
+});
 bd.connect();
+
 /**
  * intention- буфер намерений пользователя выполнить ввод данных следующим действием.
  * Хранит информацию о пользователе, изменения в которого хочет вносить админ
@@ -51,14 +56,6 @@ const intention = {
 };
 
 // ######## Middleware ###########
-/**
- * установка значений id, имени пользователя
- */
-bot.use(async (ctx, next) => {
-    ctx.userId = ctx.from.id.toString()
-    ctx.userName = ctx.from.first_name
-    await next();
-});
 
 /**
  * Каждый раз проверка, что пользователь есть в базе данных
@@ -66,48 +63,32 @@ bot.use(async (ctx, next) => {
  * Докидывает пользователя в базу, если его нет.
  */
 bot.use(async (ctx,next) => {
-    const user = await userModel.get(ctx.userId);
+    ctx.userId = ctx.from.id
+    bd.getUserFromDB(ctx.from.id).then(user => {
     if(!user){
-        ctx.status = "student";
-        ctx.opener = "false";
-        console.log(ctx.userId)
-        if(ctx.userId == cfg.TG_ADMIN_ID){
-            ctx.status = 'admin';
-            ctx.opener = "true";
+        ctx.role = "student";
+        ctx.opener = 0;
+        console.log(ctx.from.id)
+        if(ctx.from.id == cfg.TG_ADMIN_ID){
+            ctx.role = 'admin';
+            ctx.opener = 1;
         }
-        await userModel.newUser(
-            {
-                userId: ctx.userId,
-                username: ctx.from.username,
-                firstname: ctx.from.first_name,
-                lastname: ctx.from.last_name,
-                status: ctx.status,
-                opener: ctx.opener
-            });
+        bd.createUser(ctx.from.id, ctx.role, ctx.opener, ctx.from.first_name, ctx.from.last_name )
     }else{
-        ctx.status = user.status;
+        ctx.role = user.role;
         ctx.note = user.note;
-        ctx.opener = (user.status !== 'admin') ? user.opener : true;
-
-        if(user.username === "null"){
-            await userModel.setUserInfo(
-                {
-                    userId: ctx.userId,
-                    username: ctx.from.username,
-                    firstname: ctx.from.first_name,
-                    lastname: ctx.from.last_name
-                });
-        }
+        ctx.opener = (user.role !== 'admin') ? user.opener : true;
     }
-    await next();
+    next();
+})
 });
 
 /**
  * Логирование запросов
  */
-bot.use(async (ctx, next) => {
+/* bot.use(async (ctx, next) => {
     const recordForLog = {
-        userId: ctx.userId,
+        userId: ctx.from.id,
         username: ctx.from.username,
         realname: ctx.from.first_name + " " + ctx.from.last_name,
         note: ctx.note,
@@ -133,13 +114,13 @@ bot.use(async (ctx, next) => {
     ctx.request = recordForLog.message;
     await logs.addLog(recordForLog);
     await next();
-});
+}); */
 
 /**
  * отсекаю пользователям действия, на которые у них нет прав
  */
 bot.use(async (ctx, next) => {
-    if(await rights.hasAccess(ctx.status, ctx.messageType, ctx.request, ctx.opener)){
+    if(await rights.hasAccess(ctx.role, ctx.messageType, ctx.request, ctx.opener)){
         await next();
     }else{
         await ctx.reply("Нет доступа");
@@ -154,7 +135,7 @@ bot.use(async (ctx, next) => {
     const start = new Date();
     await next();
     const ms  = new Date() - start;
- //await  ctx.reply(`Запрос выполнен за ${ms} мс`);
+    await  ctx.reply(`Запрос выполнен за ${ms} мс`);
 });
 
 /**
@@ -211,10 +192,10 @@ bot.use(async (ctx, next) => {
  * @returns {Promise<void>}
  */
 async function hello(ctx){
-    let welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n';
+    let welcomeMessage = 'Добро пожаловать, ' + ctx.from.first_name + '\n';
     let mainKeyboard;
 
-    switch (ctx.status) {
+    switch (ctx.role) {
         case 'student':
             welcomeMessage += strings.welcomeMessage.forStudents;
             mainKeyboard = strings.mainKeyboard.forStudents;
@@ -237,6 +218,7 @@ async function hello(ctx){
  * @param ctx
  * @returns {Promise<void>}
  */
+/*
 async function mySelfMenu(ctx){
     await ctx.reply('Меню самооценки:',
          Markup.inlineKeyboard(
@@ -246,12 +228,13 @@ async function mySelfMenu(ctx){
             //[Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
              ]));
 }
-
+*/
 /**
  * Выводит меню генерации отчета по практикам
  * @param ctx
  * @returns {Promise<void>}
  */
+/*
 async function reportMenu(ctx){
     await ctx.reply('Меню генерации отчетов по практике:',
         Markup.inlineKeyboard(
@@ -260,7 +243,7 @@ async function reportMenu(ctx){
                 [Markup.button.callback(strings.keyboardConstants.REPORTS_GENERATE, strings.commands.REPORTS_GENERATE)],
             ]).reply_markup);
 }
-
+*/
 /*const intention = {
     addCase: {},
     addTemplateToGenerateReport: {}
@@ -296,11 +279,12 @@ async function rightsMenu(ctx){
 async function selectUser(ctx){
     const msg = 'Выбери пользователя, дружочек :)'
     var keys = []
-    let userList = await userModel.getAllUsers();
-    userList.forEach(function(user){
-        keys.push([Markup.button.callback(`${user.firstname} ${user.lastname} ${user.userId}`, `${user.userId}`)])
+    bd.getAllUsers().then(data => {
+        data.forEach(function(user){
+            keys.push([Markup.button.callback(`${user.firstname} ${user.lastname} ${user.user_id}`, `${user.user_id}`)])
+        })
+        ctx.reply(msg, Markup.inlineKeyboard(keys))
     })
-    await ctx.reply(msg, Markup.inlineKeyboard(keys))
 }
 bot.start(async (ctx) => {
     await hello(ctx);
@@ -343,7 +327,7 @@ bot.command('logs', async (ctx) => {
  * Команда на открытие двери ВЦ
  */
 bot.hears(strings.keyboardConstants.VC, async (ctx) => {
-    await ctx.reply(await otkrivator.openItPark());
+    await ctx.reply(await otkrivator.openItPark(ctx.from.id));
 });
 
 /**
@@ -392,10 +376,11 @@ bot.command('showDate', async (ctx) => {
 /**
  * Команда на вывод меню самооценки
  */
+/*
 bot.hears(strings.keyboardConstants.MYSELF, async (ctx) => {
     await mySelfMenu(ctx);
 });
-
+*/
 /**
  * Команда на вывод меню управления правами пользователей
  */
@@ -406,10 +391,11 @@ bot.hears(strings.keyboardConstants.RIGHTS, async (ctx) => {
 /**
  * Команда на вывод меню генерации отчетов
  */
+/*
 bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
     await reportMenu(ctx);
 })
-
+*/
 /**
  * Если пользователь загрузил файл- проверяю намерение сгенерировать отчет
  */
@@ -474,18 +460,11 @@ bot.on('text', async (ctx) => {
  */
 bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
-        var self_menu = await mySelfMenuCallback(ctx, callbackQuery);
-        if(resp == false){
-            var report_menu = await reportMenuCallback(ctx, callbackQuery);
-            if(report_menu == false){         
-                var resp = await rightsMenuCallback(ctx, callbackQuery);
-                if(resp == false){
+        var resp = await rightsMenuCallback(ctx, callbackQuery);
+        if(resp == false){       
                     await selectUserCallback(ctx, callbackQuery);
-                }
             }
-        }
 });
-
 /**
  * Реакция на нажатие кнопок в меню управления пользователем
  * @param ctx
@@ -528,8 +507,8 @@ async function rightsMenuCallback(ctx, callbackQuery){
                 await ctx.reply("Введи новую заметку о пользователе, дружочек");
                 return true
                 break;
+            default: return false
         }
-        return false
     }catch (err) {
         await ctx.reply(err.message);
     }
@@ -541,6 +520,7 @@ async function rightsMenuCallback(ctx, callbackQuery){
  * @param callbackQuery
  * @returns {Promise<void>}
  */
+/*
 async function reportMenuCallback(ctx, callbackQuery){
     try {
         switch (callbackQuery) {
@@ -563,13 +543,14 @@ async function reportMenuCallback(ctx, callbackQuery){
         await ctx.reply(err.message);
     }
 }
-
+*/ //Тоже надо удалить
 /**
  * Реакция на нажатие кнопок меню самооценки
  * @param ctx
  * @param callbackQuery
  * @returns {Promise<void>}
  */
+/*
 async function mySelfMenuCallback(ctx, callbackQuery){
     try {
         switch (callbackQuery) {
@@ -590,12 +571,13 @@ async function mySelfMenuCallback(ctx, callbackQuery){
                 await replyMyselfFile(ctx.userId, ctx);
                 return true
                 break;
-        return false
+            default: return false
         }
     }catch (err) {
         await ctx.reply(err.message);
+        return false
     }
-}
+} */ //Подлежит удалению
 
 /**
  * Отдает в чат лист самооценки и прибирает мусор за генератором файла
@@ -603,6 +585,7 @@ async function mySelfMenuCallback(ctx, callbackQuery){
  * @param ctx
  * @returns {Promise<unknown>}
  */
+/*
 async function replyMyselfFile(userId, ctx){
     return new Promise(async (resolve, reject) => {
         try {
@@ -618,7 +601,7 @@ async function replyMyselfFile(userId, ctx){
         }
     });
 }
-
+*/
 bot.launch();
 
 /**
@@ -627,4 +610,5 @@ bot.launch();
 process.on("uncaughtException",(err) => {
     console.log("Все паламалась!!!");
     console.log(err.message);
+    console.log(err.stack)
 });

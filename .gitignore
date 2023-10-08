@@ -11,3 +11,5 @@ Dockerfile
 .dockerenv
 docker-compose.yml
 image.tar
+test.js
+test.sqlite3

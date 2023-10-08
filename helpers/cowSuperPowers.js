@@ -11,6 +11,7 @@
 * */
 const strings = require('../resources/strings');
 const users = require('../models/users');
+const botDb = require('../models/botBd');
 
 /**
  * Проверяет имеет ли конкретный пользователь доступ к выбраному действию
@@ -69,18 +70,18 @@ module.exports.getAdmins = async () => {
 module.exports.getUserInfo = async (userId) => {
     const message = [];
     try {
-        const userInfo = await users.get(userId);
+        const userInfo = await botDb.getUserFromDB(userId);
         if(userInfo){
-            if(userInfo.status === "admin"){
+            if(userInfo.role === "admin"){
                 return "Выбранный пользователь имеет статуст администратора. Вы не можете управлять " +
                     "администраторами";
             }
-            message.push([`Выбран пользователь с id: ${userInfo.userId}`],
+            message.push([`Выбран пользователь с id: ${userId}`],
                 [`Имя: ${userInfo.firstname} ${userInfo.lastname}`],
                 [`username: ${userInfo.username}`],
-                [`Текущий статус: ${userInfo.status}`],
+                [`Текущий статус: ${userInfo.role}`],
                 [`Открывать дверь ВЦ: ${(userInfo.opener)? "МОЖЕТ": "НЕ МОЖЕТ"}`],
-                [`Заметки: ${userInfo.note}`]);
+                [`Заметки: ${userInfo.notes}`]);
             return message.join('\n');
         }
         else{
@@ -102,15 +103,15 @@ module.exports.getUserInfo = async (userId) => {
 module.exports.changeUserProperty = async (userId, property, note) => {
     note = note || '';
     try {
-        const user = await users.get(userId);
+        const user = await botDb.getUserFromDB(userId);
         const newProperty = {
-            status: user.status,
+            role: user.role,
             opener: user.opener,
-            note: note,
+            notes: note,
         };
         switch (property) {
             case 'status':
-                newProperty.status = (newProperty.status === 'student') ? 'teacher' : 'student';
+                newProperty.role = (user.role == 'student') ? 'teacher' : 'student';
                 break;
             case 'opener':
                 newProperty.opener = !newProperty.opener;
@@ -118,7 +119,7 @@ module.exports.changeUserProperty = async (userId, property, note) => {
             default:
                 break;
         }
-        await users.changeUserCharacteristics(userId, newProperty);
+        await botDb.changeUserCharacteristics(userId, newProperty);
     }catch (err){
         throw new Error(err.message + ' у вас проблемы с коровьей суперсилой. Сбоит changeUserProperty');
     }
