@@ -73,8 +73,8 @@ bot.use(async (ctx,next) => {
         }
         bd.createUser(ctx.from.id, ctx.role, ctx.opener, ctx.from.first_name, ctx.from.last_name )
     }else{
+        if(user.username == null) bd.setUsername(ctx.from.id, ctx.from.username)
         ctx.role = user.role;
-        console.log(ctx.role)
         ctx.note = user.note;
         ctx.opener = (user.role !== 'admin') ? user.opener : true;
     }
@@ -304,7 +304,7 @@ bot.command('getId', async (ctx) => {
  * Выводит список всех админов
  */
 bot.command('admins', async (ctx) => {
-    await ctx.reply(await rights.getAdmins());
+    rights.getAdmins().then(resp => ctx.reply(resp))
 });
 
 /**

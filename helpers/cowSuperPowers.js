@@ -11,6 +11,7 @@
 * */
 const strings = require('../resources/strings');
 const botDb = require('../models/botBd');
+const { Telegram } = require('telegraf');
 
 /**
  * Проверяет имеет ли конкретный пользователь доступ к выбраному действию
@@ -52,12 +53,15 @@ module.exports.hasAccess = (status, requestType, request, opener = true) => {
  * @returns {Promise<string>}
  */
 module.exports.getAdmins = async () => {
-    const adminsResponse = await users.getAllAdmin();
-    const admins = [];
-    for(const user of adminsResponse){
-        admins.push('@' + user.username + ' ' + user.firstname + ' ' + user.lastname);
-    }
-    return 'Список админов:\n' + admins.join('\n');
+    return new Promise(resolve => {
+        botDb.getAllAdmin().then(adminsResponse => {
+            const admins = [];
+            adminsResponse.forEach(user => {
+                admins.push('@' + user.username  + ' ' + user.firstname + ' ' + user.lastname); 
+            });
+            resolve('Список админов:\n' + admins.join('\n'));
+            })
+    })
 }
 
 /**
@@ -77,7 +81,7 @@ module.exports.getUserInfo = async (userId) => {
             }
             message.push([`Выбран пользователь с id: ${userId}`],
                 [`Имя: ${userInfo.firstname} ${userInfo.lastname}`],
-                [`username: ${userInfo.username}`],
+                [`ID: ${userId}`],
                 [`Текущий статус: ${userInfo.role}`],
                 [`Открывать дверь ВЦ: ${(userInfo.opener)? "МОЖЕТ": "НЕ МОЖЕТ"}`],
                 [`Заметки: ${userInfo.notes}`]);

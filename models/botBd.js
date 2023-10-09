@@ -4,7 +4,7 @@ const db = new Database('./test.sqlite3');
 
 module.exports.connect = () => {
     db.serialize(() => {
-        db.run(`CREATE TABLE IF NOT EXISTS "users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user_id" TEXT NOT NULL, "role" TEXT, "opener" INTEGER, "notes" TEXT, "firstname" TEXT, "lastname" TEXT)`)
+        db.run(`CREATE TABLE IF NOT EXISTS "users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user_id" TEXT NOT NULL, "role" TEXT, "opener" INTEGER, "notes" TEXT, "firstname" TEXT, "lastname" TEXT, "username" TEXT)`)
         console.log("Database ready!")
     })
 }
@@ -15,6 +15,15 @@ module.exports.getAllUsers = () => {
             console.log(row)
             resolve(row)
         })
+    })
+}
+module.exports.setUsername = (userId, username) => {
+    var q = ""
+    q += `UPDATE "users" `
+    q += `SET "username" = "${username}" `
+    q += `WHERE user_id == "${userId}"`
+    db.run(q, function(err){
+        if(err) console.log(err)
     })
 }
 module.exports.changeUserCharacteristics = (userId, newProperty) => {
@@ -54,6 +63,15 @@ module.exports.IsOpener = (user_id) => {
 module.exports.getUserFromDB = (user_id) => {
     return new Promise((resolve) => {
         db.get(`SELECT * FROM "users" WHERE user_id == "${user_id}"`, function(err, row){
+            if(err) console.log(err)
+            resolve(row)
+        })
+    })
+}
+
+module.exports.getAllAdmin = () => {
+    return new Promise((resolve) => {
+        db.all(`SELECT * FROM "users" WHERE role == "admin"`, function(err, row){
             if(err) console.log(err)
             resolve(row)
         })
