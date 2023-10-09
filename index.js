@@ -74,6 +74,7 @@ bot.use(async (ctx,next) => {
         bd.createUser(ctx.from.id, ctx.role, ctx.opener, ctx.from.first_name, ctx.from.last_name )
     }else{
         ctx.role = user.role;
+        console.log(ctx.role)
         ctx.note = user.note;
         ctx.opener = (user.role !== 'admin') ? user.opener : true;
     }
@@ -84,7 +85,7 @@ bot.use(async (ctx,next) => {
 /**
  * Логирование запросов
  */
-/* bot.use(async (ctx, next) => {
+bot.use(async (ctx, next) => {
     const recordForLog = {
         userId: ctx.from.id,
         username: ctx.from.username,
@@ -110,9 +111,9 @@ bot.use(async (ctx,next) => {
     }
     ctx.messageType = recordForLog.messageType;
     ctx.request = recordForLog.message;
-    await logs.addLog(recordForLog);
+    //await logs.addLog(recordForLog);
     await next();
-}); */
+}); 
 
 /**
  * отсекаю пользователям действия, на которые у них нет прав
