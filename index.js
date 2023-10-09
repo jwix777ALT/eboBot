@@ -365,14 +365,7 @@ bot.command('showDate', async (ctx) => {
     }
 });
 
-/**
- * Команда на вывод меню самооценки
- */
-/*
-bot.hears(strings.keyboardConstants.MYSELF, async (ctx) => {
-    await mySelfMenu(ctx);
-});
-*/
+
 /**
  * Команда на вывод меню управления правами пользователей
  */
@@ -380,14 +373,6 @@ bot.hears(strings.keyboardConstants.RIGHTS, async (ctx) => {
     await rightsMenu(ctx);
 });
 
-/**
- * Команда на вывод меню генерации отчетов
- */
-/*
-bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
-    await reportMenu(ctx);
-})
-*/
 /**
  * Если пользователь загрузил файл- проверяю намерение сгенерировать отчет
  */
