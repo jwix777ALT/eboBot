@@ -7,14 +7,12 @@ const {Markup} = require('telegraf');
 const cfg = require('./resources/config');
 const strings = require('./resources/strings');
 const otkrivator = require('./helpers/otkrivator');
-const jitsi = require('./helpers/jitsi');
 const bells = require('./helpers/bells');
-const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
-const logs = require('./models/logs');
+//const logs = require('./models/logs');
 const rights = require('./helpers/cowSuperPowers');
-const logsHelper = require('./helpers/logs');
+//const logsHelper = require('./helpers/logs');
 const { telegrafThrottler } = require('telegraf-throttler');
 
 var cb_query = {}

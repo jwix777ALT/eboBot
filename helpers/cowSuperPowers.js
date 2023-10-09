@@ -10,7 +10,6 @@
 * можно сотворить только вручную в базе), может давать избранным студентам доступ к открывашке двери
 * */
 const strings = require('../resources/strings');
-const users = require('../models/users');
 const botDb = require('../models/botBd');
 
 /**
