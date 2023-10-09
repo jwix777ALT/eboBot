@@ -4,6 +4,7 @@ const db = new Database('./test.sqlite3');
 
 module.exports.connect = () => {
     db.serialize(() => {
+        db.run(`CREATE TABLE IF NOT EXISTS "users" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, "user_id" TEXT NOT NULL, "role" TEXT, "opener" INTEGER, "notes" TEXT, "firstname" TEXT, "lastname" TEXT)`)
         console.log("Database ready!")
     })
 }
