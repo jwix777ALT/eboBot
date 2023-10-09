@@ -53,16 +53,9 @@ module.exports.welcomeMessage = {
         'Ты можешь смотреть расписание звонков \nОткрывать дверь ВЦ, если тебе лично разрешит\nодин' +
         'из админов.\nСписок админов можно получить по команде /admins\n'+
         'чтобы повысить уровень привилегий- проси админа\nПолучить свой id /getId \n' +
-        'Можешь получать список активных конференций\n' +
-        'Можешь вести листы самооценки\n' +
-        'Чтобы быстро добавить дело введи:\n' +
-        'Д: %whatYourDo%\n' +
         'Чтобы включить или выключить отображение дат в листе самооценки: /showDate,\n' +
-        'Можешь генерировать характеристики студентов для УП\n' +
         'Выебри дейтсвие на клавиатуре, или воспользуйся командами',
     forAdmins: "Твой уровень доступа- администратор\n" +
-        "Чтобы быстро добавить дело введи:\n" +
-        "Д: %whatYourDo%',\n" +
         "Чтобы включить или выключить отображение дат в листе самооценки: /showDate,\n" +
         "Чтобы выгрузить логи: /logs\n" +
         "Список админов можно получить по команде /admins\n" +
@@ -86,12 +79,9 @@ module.exports.mainKeyboard = {
                 [
                     keyboardConstants.VC,
                     keyboardConstants.BELLS,
-                 //   keyboardConstants.JITSY
                 ],
                 [
                     keyboardConstants.RIGHTS,
-                    keyboardConstants.MYSELF,
-                  //  keyboardConstants.REPORTS
                 ]
             ]
         }
@@ -102,11 +92,6 @@ module.exports.mainKeyboard = {
                 [
                     keyboardConstants.VC,
                     keyboardConstants.BELLS,
-                ],
-                [
-                 //   keyboardConstants.JITSY,
-                 //   keyboardConstants.MYSELF,
-                  //  keyboardConstants.REPORTS
                 ]
             ]
         }

@@ -336,13 +336,6 @@ bot.hears(strings.keyboardConstants.BELLS, async (ctx) => {
 });
 
 /**
- * Команда на статус Jitsi
- */
-bot.hears(strings.keyboardConstants.JITSY, async (ctx) => {
-    await ctx.reply(ctx.userName + ', ' + await jitsi.health());
-});
-
-/**
  * заглушка на команду на открытие мастерских
 bot.command('open_m', async (ctx) => {
     await ctx.reply(await otkrivator.openMasterskie());
